@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="static/img/favicon.ico" type="image/x-icon" />
+    <title>AI Chatbot saler</title>
+    <!-- Add this CSS style inside the head tag -->
+    <style>
+        #typing-indicator {
+            display: none;
+        }
+        #user-input {
+            width: 80%; /* Adjust the width as needed */
+            height: 50px; /* Adjust the height as needed */
+            padding: 5px;
+            font-size: 16px;
+        }
+        #chat-form button {
+            width: 100px; /* Adjust the width as needed */
+            height: 50px; /* Adjust the height as needed */
+            font-size: 16px;
+        }
+        .message {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .avatar {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        /**
+        * ==============================================
+        * Dot Flashing
+        * ==============================================
+        */
+        .dot-flashing {
+        position: relative;
+        top: 4px;
+        width: 4px;
+        height: 4px;
+        border-radius: 0px;
+        background-color: #000000;
+        color: #000000;
+        animation: dot-flashing 1s infinite linear alternate;
+        animation-delay: 0.2s;
+        }
+        .dot-flashing::before, .dot-flashing::after {
+        content: "";
+        display: inline-block;
+        position: absolute;
+        top: 0;
+        }
+        .dot-flashing::before {
+        top: 4px;
+        left: 10px;
+        width: 4px;
+        height: 4px;
+        border-radius: 0px;
+        background-color: #000000;
+        color: #000000;
+        animation: dot-flashing 1s infinite alternate;
+        animation-delay: 0s;
+        }
+        .dot-flashing::after {
+        top: 4px;
+        left: 20px;
+        width: 4px;
+        height: 4px;
+        border-radius: 0px;
+        background-color: #000000;
+        color: #000000;
+        animation: dot-flashing 1s infinite alternate;
+        animation-delay: 1s;
+        }
+
+        @keyframes dot-flashing {
+        0% {
+            background-color: #000000;
+        }
+        50%, 100% {
+            background-color: rgba(152, 128, 255, 0.2);
+        }
+        }
+    </style>
+
+    <!-- Add this div inside the body tag -->
+    <div id="typing-indicator">Bot is typing...</div>
+
+    <!-- Update the JavaScript code -->
+    <script>
+        // Add this function to clear the session on page load
+        function clearSession() {
+            $.post("/clear_session");
+        }
+
+        $window.location.reload();
+        sessionStorage.clear();
+    
+        // Call the clearSession function when the page is loaded
+        $(document).ready(clearSession);
+    
+        function typeMessage(element, message, index, interval) {
+            if (index < message.length) {
+                element.append(message[index++]);
+                setTimeout(function () {
+                    typeMessage(element, message, index, interval);
+                }, interval);
+            }
+        }
+        
+    </script>
+
+</head>
+<body>
+    <h1>Mega Gangnam Official</h1>
+    <button id="clear-session-btn">Clear History</button>
+    <br/>
+    <br/>
+    <form id="chat-form" autocomplete="off">
+        <input type="text" id="user-input" placeholder="Type your message...">
+        <button type="submit">Send</button>
+    </form>
+    
+    <div id="chat-history"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $("#chat-form").submit(function(event) {
+            event.preventDefault();
+            var userInput = $("#user-input").val();
+            
+            // Disable the form and clear the input field
+            $("#user-input").prop("disabled", true).val("").attr("placeholder", "CSKH is typing...");
+            $("#chat-form button").prop("disabled", true);
+
+              // Add user avatar and message
+            $("#chat-history").append('<div class="message"><span class="avatar">&#128120;</span><span>Bạn: ' + userInput + '</span></div>');
+            
+            // Function to append bot avatar, name, and an empty message container with three floating dots
+            function appendBotAvatar() {
+                var botMessageContainer = $('<div class="message"><span class="avatar">&#128129;</span><span class="bot-message">CSKH Mega Gangnam: <span class="dot-flashing"></span></span></div>');
+                $("#chat-history").append(botMessageContainer);
+                
+                $.post("/chat", { user_input: userInput }, function(data) {
+                    // Type the bot message with a typing effect
+                    var botMessageElement = botMessageContainer.find(".bot-message");
+                    typeMessage(botMessageElement,  data.response, 0, 50);
+                    
+                    // Enable the form, restore the normal placeholder
+                    $("#user-input").prop("disabled", false).attr("placeholder", "Type your message...");
+                    $("#chat-form button").prop("disabled", false);
+                });
+            }
+
+            // Add a pause of 0.2 seconds before appending the bot avatar
+            setTimeout(appendBotAvatar, 1000);
+
+        });
+
+        $("#clear-session-btn").click(function() {
+            $.post("/clear_session", function(data) {
+                if (data.status === 'success') {
+                    $("#chat-history").empty();
+                }
+            });
+        });
+    </script>
+
+
+</body>
+</html>
+
+
