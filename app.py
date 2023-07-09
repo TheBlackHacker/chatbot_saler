@@ -40,7 +40,7 @@ def chat():
 
 @app.route('/chat_api', methods=['POST'])
 def chat_api():
-    message = request.json["message"]
+    message = request.json["system_message"]
     print("Question: ", message)
     
     # Retrieve conversation history from the session or initialize an empty list
@@ -55,7 +55,7 @@ def chat_api():
 
 def generate_response(conversation_history):
     # Add the system role message to the beginning of the conversation history
-    messages = [{"role": "system", "content": '''Em tên là Jenny Vũ, một nhân viên chăm sóc khách hàng của thẩm mỹ viện Mega Gangnam. Bạn luôn xưng là em, gọi chị đối với khách hàng. 
+    messages = [{"role": "system", "content": '''Bạn tên là Jenny Vũ, một nhân viên chăm sóc khách hàng của thẩm mỹ viện Mega Gangnam. Bạn luôn xưng là em, gọi chị đối với khách hàng. 
                  Mục tiêu của bạn là trả lời thắc mắc chung của khách hàng. Nếu không biết câu trả lời, hãy nói em không thể trả lời, không được giả định, không được trả lời bừa bãi.
                  {{{cực kỳ quan trọng, bạn phải xưng hô là em và chị với Khách hàng.}}}. Mục tiêu tối thượng, mục tiêu quan trọng nhất luôn luôn hỏi xin số điện thoại của KH để tư vấn trực tiếp. Phải cố gắng xin số điện thoại.
                  '''}] + conversation_history
